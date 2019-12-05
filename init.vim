@@ -10,7 +10,7 @@
 " Features include: file navigator, fuzzy file search, git controls, powerful
 " code navigation, 
 "
-" requires: fzf
+" requires: fzf figlet powerline
 
 
 "  ____  _             _           
@@ -24,16 +24,18 @@ call plug#begin('~/.vim/plugged')
 
 " Visual Plugins
 Plug 'dracula/vim', { 'name': 'dracula' }
-Plug 'miyakogi/seiya.vim'
 
+" Sidebar
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'ryanoasis/vim-devicons'
 
 " Code Navigation Plugins
 Plug 'easymotion/vim-easymotion'
+Plug 'justinmk/vim-sneak'
 
 " File Navigation Plugins
 Plug 'mhinz/vim-startify'
-Plug 'scrooloose/nerdtree'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 
@@ -42,7 +44,51 @@ Plug 'scrooloose/nerdcommenter'
 
 " Git Plugins
 Plug 'tpope/vim-fugitive'
-Plug 'Xuyuanp/nerdtree-git-plugin'
+
+
+" Intellisense
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" Code Scratchpad
+Plug 'metakirby5/codi.vim'
+
+" Tmux Plugins
+Plug 'christoomey/vim-tmux-navigator'
+
+" Airline Plugins
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+
+" Formatting/Linting
+Plug 'prettier/vim-prettier', {
+  \ 'do': 'yarn install',
+  \ 'branch': 'release/1.x',
+  \ 'for': [
+    \ 'javascript',
+    \ 'typescript',
+    \ 'css',
+    \ 'less',
+    \ 'scss',
+    \ 'json',
+    \ 'graphql',
+    \ 'markdown',
+    \ 'vue',
+    \ 'lua',
+    \ 'php',
+    \ 'python',
+    \ 'ruby',
+    \ 'html',
+    \ 'swift' ] }
+
+
+"let g:prettier#autoformat = 1
+"autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
+
+
+" =============================================================== "
+" LANGUAGE SPECIFIC PLUGINS ||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
 
 " JavaScript Plugins
 Plug 'pangloss/vim-javascript'
@@ -50,12 +96,9 @@ Plug 'mxw/vim-jsx'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'mhartington/nvim-typescript', {'do': './install.sh'}
 
-
-" Intellisense
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-Plug 'metakirby5/codi.vim'
-
+" =============================================================== "
+" ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -70,24 +113,39 @@ call plug#end()
 "
 
 set t_Co=256
+set t_ZH=^[[3m
+set t_ZR=^[[23m
+
+" Colorscheme
+set background=dark
 syntax on
 colorscheme dracula
-let g:seiya_auto_enable=1
-hi VertSplit ctermfg=BLACK ctermbg=NONE
 
 
+" Colorscheme overrides
+hi Normal ctermbg=234
 
+" Enable italic comments
+" TODO: allow italics to be toggled via VMUX_VIM_ITALICS
+hi Comment cterm=italic ctermfg=61
+
+
+" Code formatting
+set tabstop=2
 set shiftwidth=2
 set autoindent
+set expandtab
 set smartindent
-set number
+
+" TODO: allow line numbers to be toggled via VMUX_VIM_NUMBERS
+"set number
 
 filetype plugin on
 
 " Required for devicons
 set encoding=UTF-8
 
-set fillchars+=vert:│
+" set fillchars+=vert:│
 
 
 
@@ -121,6 +179,7 @@ set signcolumn=yes
 " NERDtree keybinds
 map <C-n> :NERDTreeToggle<CR>
 
+
 " move visual lines up/down
 nnoremap <A-j> :m .+1<CR>==
 nnoremap <A-k> :m .-2<CR>==
@@ -130,13 +189,16 @@ vnoremap <A-j> :m '>+1<CR>gv=gv
 vnoremap <A-k> :m '<-2<CR>gv=gv
 
 " Pane navigation
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
+"nnoremap <C-J> <C-W><C-J>
+"nnoremap <C-K> <C-W><C-K>
+"nnoremap <C-L> <C-W><C-L>
+"nnoremap <C-H> <C-W><C-H>
 
 
-" neoclide
+" =============================================================== "
+" NEOCLIDE/COC |||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
 inoremap <silent><expr> <TAB>
@@ -258,7 +320,11 @@ nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 "
 
 
-" startify
+
+" =============================================================== "
+" STARTIFY |||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
 let g:startify_bookmarks = [
   \ '~/.config/nvim/init.vim',
   \ '~/code'
@@ -272,8 +338,12 @@ let g:startify_lists = [
   \ { 'type': 'commands',  'header': ['   Commands']       },
   \ ]
 
+let g:startify_custom_header = systemlist('figlet Vmux')
 
-" NERDtree
+" =============================================================== "
+" NERDTREE |||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
 " Automatically open when loading a directory
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | exe 'cd '.argv()[0] | endif
@@ -296,7 +366,9 @@ let g:NERDTreeIndicatorMapCustom = {
   \ }
 
 
-" JavaScript
+" =============================================================== "
+" JAVASCRIPT |||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
 
 " Enable syntax coloring for JSDocs
 let g:javascript_plugin_jsdoc = 1
@@ -304,9 +376,43 @@ let g:javascript_plugin_jsdoc = 1
 let g:javascript_plugin_flow = 1
 
 
-" TypeScript
+
+" =============================================================== "
+" AIRLINE ||||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
+let g:airline_theme='dracula'
 
 
-" NeoClide (intellisense)
+
+" =============================================================== "
+" FZF ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
+let g:fzf_action = {
+      \ 'ctrl-s': 'split',
+      \ 'ctrl-v': 'vsplit'
+      \ }
+nnoremap <expr> <c-p> (len(system('git rev-parse')) ? ':Files' : ':GFiles')."\<cr>"
+
+augroup fzf
+  autocmd!
+  autocmd! FileType fzf
+  autocmd  FileType fzf set laststatus=0 noshowmode noruler
+    \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
+augroup END
+
+" =============================================================== "
+" SNEAK ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
+let g:sneak#label = 1
+
+map ; <Plug>(easymotion-prefix)
 
 
+" =============================================================== "
+" CODI SCRATCHPAD ||||||||||||||||||||||||||||||||||||||||||||||| "
+" =============================================================== "
+
+let g:codi#autocmd = 'InsertLeave'
